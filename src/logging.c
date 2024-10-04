@@ -8,8 +8,10 @@
 #include "logging.h"
 #include "webusb.h"
 #include "common.h"
+#include "config.h"
 
 LogLevel logging_level = LOG_INFO;
+LogMask logging_mask = LOG_BASIC;
 
 // Control if the logging logic should assume the execution is withint the
 // main loop or not.
@@ -17,10 +19,24 @@ bool logging_onloop = false;
 
 void logging_set_level(LogLevel level) {
     logging_level = level;
+    config_set_log_level(logging_level);
 }
 
-bool logging_get_level() {
+LogLevel logging_get_level() {
     return logging_level;
+}
+
+void logging_set_mask(LogMask mask) {
+    logging_mask = mask;
+    config_set_log_mask(logging_mask);
+}
+
+bool logging_has_mask(LogMask mask) {
+    return logging_mask & mask;
+}
+
+LogMask logging_get_mask() {
+    return logging_mask;
 }
 
 void logging_set_onloop(bool value) {
@@ -29,6 +45,12 @@ void logging_set_onloop(bool value) {
 
 bool logging_get_onloop() {
     return logging_onloop;
+}
+
+void logging_load_from_config() {
+    Config *config = config_read();
+    logging_level = config->log_level;
+    logging_mask = config->log_mask;
 }
 
 void logging_init() {
